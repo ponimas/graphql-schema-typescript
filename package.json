@@ -25,15 +25,15 @@
     "@playlyfe/gql": "2.3.2",
     "@types/fs-extra": "4.0.4",
     "@types/graphql": "^14.5.0",
-    "@types/jest": "21.1.5",
+    "@types/jest": "^25.1.4",
     "@types/lodash": "^4.14.149",
     "@types/node": "^13.9.2",
     "@types/yargs": "^11.0.0",
     "del-cli": "^2.0.0",
     "fs-extra": "4.0.2",
     "graphql": "^14.6.0",
-    "jest": "22.4.3",
-    "ts-jest": "22.4.4",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.1",
     "tslint": "5.8.0",
     "typescript": "^3.8.3"
   },
@@ -49,15 +49,14 @@
   "jest": {
     "testEnvironment": "node",
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".ts": "ts-jest"
     },
     "testRegex": "/__tests__/.*\\.test\\.ts$",
     "moduleFileExtensions": [
       "ts",
-      "tsx",
-      "js",
-      "json"
-    ]
+      "js"
+    ],
+    "testTimeout": 30000
   },
   "bugs": {
     "url": "https://github.com/ruiaraujo/graphql-schema-typescript/issues"

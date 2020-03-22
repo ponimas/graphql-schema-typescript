@@ -1,4 +1,4 @@
-import { GenerateTypescriptOptions } from './types';
+import { defaultOptions, GenerateTypescriptOptions } from './types';
 import {
     isBuiltinType,
     createFieldRef,
@@ -37,6 +37,9 @@ export class TSResolverGenerator {
         protected introspectionResult: IntrospectionQuery
     ) {
         this.contextType = options.contextType || 'any';
+
+        this.importHeader.push('/* tslint:disable */');
+        this.importHeader.push('/* eslint-disable */');
         if (options.importStatements) {
             this.importHeader.push(...options.importStatements);
         }
@@ -49,13 +52,12 @@ export class TSResolverGenerator {
         this.mutationType = introspectionResult.__schema.mutationType;
         this.subscriptionType = introspectionResult.__schema.subscriptionType;
 
-        this.importHeader.push('/* tslint:disable */');
-        this.importHeader.push('/* eslint-disable */');
-
         const hasCustomScalar = !!gqlTypes.find(type => type.kind === 'SCALAR');
         if (hasCustomScalar) {
-            this.importHeader.push(`import { GraphQLResolveInfo, GraphQLScalarType } from 'graphql';`);
-        } else {
+            this.importHeader.push(`import { GraphQLScalarType } from 'graphql';`);
+        }
+
+        if (this.options.resolveInfoType === defaultOptions.resolveInfoType) {
             this.importHeader.push(`import { GraphQLResolveInfo } from 'graphql';`);
         }
 
@@ -120,7 +122,7 @@ export class TSResolverGenerator {
 
         this.resolverInterfaces.push(...[
             `export interface ${interfaceName}<TParent = ${this.guessTParent(type.name)}> {`,
-            `(parent: TParent, context: ${this.contextType}, info${infoModifier}: GraphQLResolveInfo): ${possbileTypes.join(' | ')};`,
+            `(parent: TParent, context: ${this.contextType}, info${infoModifier}: ${this.options.resolveInfoType}): ${possbileTypes.join(' | ')};`,
             '}'
         ]);
 
@@ -175,16 +177,17 @@ export class TSResolverGenerator {
             const fieldResolverTypeDef = !isSubscription
                 ? [
                     `export interface ${fieldResolverName}<TParent = ${TParent}, TResult = ${TResult}> {`,
-                    `(parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: GraphQLResolveInfo): ${returnType};`,
+                    `(parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: ${
+                this.options.resolveInfoType}): ${returnType};`,
                     '}',
                     ''
                 ]
                 : [
                     `export interface ${fieldResolverName}<TParent = ${TParent}, TResult = ${TResult}> {`,
                     // tslint:disable-next-line:max-line-length
-                    `resolve${this.getModifier()}: (parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: GraphQLResolveInfo) => ${returnType};`,
+                    `resolve${this.getModifier()}: (parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: ${this.options.resolveInfoType}) => ${returnType};`,
                     // tslint:disable-next-line:max-line-length
-                    `subscribe: (parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: GraphQLResolveInfo) => ${subscriptionReturnType};`,
+                    `subscribe: (parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: ${this.options.resolveInfoType}) => ${subscriptionReturnType};`,
                     '}',
                     ''
                 ];

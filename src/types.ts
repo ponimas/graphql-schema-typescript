@@ -31,6 +31,9 @@ export interface GenerateTypescriptOptions {
     /** Name of your graphql context type. Default to `any` if not specified */
     contextType?: string;
 
+    /** Name of your graphql resolve type. Default to `GraphQLResolveInfo` if not specified */
+    resolveInfoType: string;
+
     /** Name of your graphql rootValue type, Default to `undefined` if not specified */
     rootValueType?: string;
 
@@ -101,7 +104,7 @@ export interface GenerateTypescriptOptions {
     noStringEnum?: boolean;
 
     /**
-     * If true resolver info arguements will be marked as optional
+     * If true resolver info arguments will be marked as optional
      */
     optionalResolverInfo?: boolean;
 
@@ -115,6 +118,7 @@ export const defaultOptions: GenerateTypescriptOptions = {
     tabSpaces: 2,
     typePrefix: 'GQL',
     contextType: 'any',
+    resolveInfoType: 'GraphQLResolveInfo',
     rootValueType: 'undefined',
     strictNulls: false,
 };

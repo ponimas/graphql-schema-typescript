@@ -77,7 +77,7 @@ export const executeApiTest = async (
 
     // ensure no error on tsc
     const generated = fs.readFileSync(outputPath, 'utf-8');
-    await executeCommand(`yarn -s tsc --noEmit --lib es6,esnext.asynciterable --target es5 ${outputPath}`);
+    await executeCommand(`./node_modules/.bin/tsc --noEmit --skipLibCheck --lib es6,esnext.asynciterable --target es5 ${outputPath}`);
 
     // snapshot
     expect(generated).toMatchSnapshot();

@@ -17,8 +17,9 @@ function handleError(message: string, error: Error = new Error(message)) {
 const globalOpt: keyof GenerateTypescriptOptions = 'global';
 const typePrefix: keyof GenerateTypescriptOptions = 'typePrefix';
 const namespaceOpt: keyof GenerateTypescriptOptions = 'namespace';
-const miminizeInterface: keyof GenerateTypescriptOptions = 'minimizeInterfaceImplementation';
+const minimizeInterface: keyof GenerateTypescriptOptions = 'minimizeInterfaceImplementation';
 const contextType: keyof GenerateTypescriptOptions = 'contextType';
+const resolveInfoType: keyof GenerateTypescriptOptions = 'resolveInfoType';
 const importStatements: keyof GenerateTypescriptOptions = 'importStatements';
 const strictNulls: keyof GenerateTypescriptOptions = 'strictNulls';
 const smartTResult: keyof GenerateTypescriptOptions = 'smartTResult';
@@ -44,15 +45,20 @@ yargs
         string: true,
         default: defaultOptions[namespaceOpt]
     })
-    .option(miminizeInterface, {
+    .option(minimizeInterface, {
         desc: 'Ignore copying of interface keys to type implementation',
         boolean: true,
-        default: defaultOptions[miminizeInterface]
+        default: defaultOptions[minimizeInterface]
     })
     .options(contextType, {
         desc: 'Name of your graphql context type',
         string: true,
         default: defaultOptions[contextType]
+    })
+    .options(resolveInfoType, {
+        desc: 'Name of your graphql resolve info type',
+        string: true,
+        default: defaultOptions[resolveInfoType]
     })
     .option(importStatements, {
         desc: 'Import statements at the top of the generated file that import your custom scalar type and context type',
@@ -96,7 +102,7 @@ yargs
     })
     .command(
         'generate-ts <folderPath>',
-        'Generate typescript definitions from a local folder that cointains `.graphql` type definitions',
+        'Generate typescript definitions from a local folder that contains `.graphql` type definitions',
         {},
         async argv => {
             const { folderPath, output } = argv;
@@ -105,8 +111,9 @@ yargs
             options[globalOpt] = argv[globalOpt];
             options[typePrefix] = argv[typePrefix];
             options[namespaceOpt] = argv[namespaceOpt];
-            options[miminizeInterface] = argv[miminizeInterface];
+            options[minimizeInterface] = argv[minimizeInterface];
             options[contextType] = argv[contextType];
+            options[resolveInfoType] = argv[resolveInfoType];
             options[importStatements] = argv[importStatements];
             options[strictNulls] = argv[strictNulls];
             options[smartTResult] = argv[smartTResult];

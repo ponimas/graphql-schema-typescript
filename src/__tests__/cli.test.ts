@@ -1,7 +1,7 @@
 import * as fsa from 'fs-extra';
 import * as path from 'path';
 import { executeCommand } from './testUtils';
-import { testSchema } from './testSchema/index';
+import { testSchema } from './testSchema';
 import { generateTypeScriptTypes } from '../index';
 import { GenerateTypescriptOptions } from '../types';
 
@@ -12,14 +12,14 @@ const outputFolder = path.join(__dirname, 'generatedTypes-CLIs');
 async function executeCLITest(
     testId: string,
     cmdOptions: string = '',
-    apiOptions: GenerateTypescriptOptions = {}
+    apiOptions: Partial<GenerateTypescriptOptions> = {}
 ) {
     const outputPathCLI = path.join(outputFolder, testId + '-CLI.ts');
     const outputPathAPI = path.join(outputFolder, testId + '-API.ts');
 
     const cmd = `${baseCmd} ${schemaFolderPath} --output ${outputPathCLI} ${cmdOptions}`;
     await executeCommand(cmd);
-    await generateTypeScriptTypes(testSchema, outputPathAPI, apiOptions);
+    generateTypeScriptTypes(testSchema, outputPathAPI, apiOptions as GenerateTypescriptOptions);
 
     const cliTypes = fsa.readFileSync(outputPathCLI, 'utf-8');
     const apiTypes = fsa.readFileSync(outputPathAPI, 'utf-8');
