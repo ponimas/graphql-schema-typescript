@@ -221,12 +221,9 @@ export interface RootSubscription {
 export interface Resolver {
   RootQuery?: RootQueryTypeResolver;
   User?: UserTypeResolver;
-  IProduct?: {
-    __resolveType: IProductTypeResolver
-  };
-  
+  IProduct?: IProductTypeResolver;
   SearchResult?: {
-    __resolveType: SearchResultTypeResolver
+    __resolveType: SearchResultResolveType
   };
   
   ProductA?: ProductATypeResolver;
@@ -304,10 +301,29 @@ export interface UserToActivatedResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface IProductTypeResolver<TParent = any> {
+export interface IProductResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'ProductA' | 'ProductB';
 }
-export interface SearchResultTypeResolver<TParent = any> {
+export interface IProductTypeResolver<TParent = any> {
+  __resolveType: IProductResolveType
+  id?: IProductToIdResolver<TParent>;
+  name?: IProductToNameResolver<TParent>;
+  relatedProducts?: IProductToRelatedProductsResolver<TParent>;
+}
+
+export interface IProductToIdResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToRelatedProductsResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface SearchResultResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
 }
 export interface ProductATypeResolver<TParent = any> {
@@ -820,12 +836,9 @@ export interface MyCustomPrefixRootSubscription {
 export interface MyCustomPrefixResolver {
   RootQuery?: MyCustomPrefixRootQueryTypeResolver;
   User?: MyCustomPrefixUserTypeResolver;
-  IProduct?: {
-    __resolveType: MyCustomPrefixIProductTypeResolver
-  };
-  
+  IProduct?: MyCustomPrefixIProductTypeResolver;
   SearchResult?: {
-    __resolveType: MyCustomPrefixSearchResultTypeResolver
+    __resolveType: MyCustomPrefixSearchResultResolveType
   };
   
   ProductA?: MyCustomPrefixProductATypeResolver;
@@ -903,10 +916,29 @@ export interface UserToActivatedResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface MyCustomPrefixIProductTypeResolver<TParent = any> {
+export interface MyCustomPrefixIProductResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'ProductA' | 'ProductB';
 }
-export interface MyCustomPrefixSearchResultTypeResolver<TParent = any> {
+export interface MyCustomPrefixIProductTypeResolver<TParent = any> {
+  __resolveType: MyCustomPrefixIProductResolveType
+  id?: IProductToIdResolver<TParent>;
+  name?: IProductToNameResolver<TParent>;
+  relatedProducts?: IProductToRelatedProductsResolver<TParent>;
+}
+
+export interface IProductToIdResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToRelatedProductsResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface MyCustomPrefixSearchResultResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
 }
 export interface MyCustomPrefixProductATypeResolver<TParent = any> {

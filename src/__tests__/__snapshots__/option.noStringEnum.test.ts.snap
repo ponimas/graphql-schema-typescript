@@ -199,12 +199,9 @@ export interface GQLRootSubscription {
 export interface GQLResolver {
   RootQuery?: GQLRootQueryTypeResolver;
   User?: GQLUserTypeResolver;
-  IProduct?: {
-    __resolveType: GQLIProductTypeResolver
-  };
-  
+  IProduct?: GQLIProductTypeResolver;
   SearchResult?: {
-    __resolveType: GQLSearchResultTypeResolver
+    __resolveType: GQLSearchResultResolveType
   };
   
   ProductA?: GQLProductATypeResolver;
@@ -282,10 +279,29 @@ export interface UserToActivatedResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface GQLIProductTypeResolver<TParent = any> {
+export interface GQLIProductResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'ProductA' | 'ProductB';
 }
-export interface GQLSearchResultTypeResolver<TParent = any> {
+export interface GQLIProductTypeResolver<TParent = any> {
+  __resolveType: GQLIProductResolveType
+  id?: IProductToIdResolver<TParent>;
+  name?: IProductToNameResolver<TParent>;
+  relatedProducts?: IProductToRelatedProductsResolver<TParent>;
+}
+
+export interface IProductToIdResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface IProductToRelatedProductsResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface GQLSearchResultResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
 }
 export interface GQLProductATypeResolver<TParent = any> {
