@@ -18,7 +18,6 @@ import {
 } from 'graphql';
 import { IntrospectionField, IntrospectionInputValue } from 'graphql/utilities/introspectionQuery';
 
-
 export class TypeScriptGenerator {
 
     constructor(
