@@ -46,7 +46,7 @@ export class TSResolverGenerator {
     }
 
     public generate(): GenerateResolversResult {
-        const { introspectionResult } = this;
+        const {introspectionResult} = this;
         const gqlTypes = introspectionResult.__schema.types.filter(type => !isBuiltinType(type));
         this.queryType = introspectionResult.__schema.queryType;
         this.mutationType = introspectionResult.__schema.mutationType;
@@ -81,14 +81,14 @@ export class TSResolverGenerator {
                     break;
                 }
 
+                case 'INTERFACE':
                 case 'OBJECT': {
                     this.generateObjectResolver(type, isSubscription);
                     break;
                 }
 
-                case 'INTERFACE':
                 case 'UNION': {
-                    this.generateTypeResolver(type);
+                    this.generateUnionTypeResolver(type);
                     break;
                 }
 
@@ -115,18 +115,8 @@ export class TSResolverGenerator {
         this.resolverObject.push(`${scalarType.name}${this.getModifier()}: GraphQLScalarType;`);
     }
 
-    private generateTypeResolver(type: IntrospectionUnionType | IntrospectionInterfaceType) {
-        const possbileTypes = type.possibleTypes.map(pt => `'${pt.name}'`);
-        const interfaceName = `${this.options.typePrefix}${type.name}TypeResolver`;
-        const infoModifier = this.options.optionalResolverInfo ? '?' : '';
-
-        this.resolverInterfaces.push(...[
-            `export interface ${interfaceName}<TParent = ${this.guessTParent(type.name)}> {`,
-            // tslint:disable-next-line:max-line-length
-            `(parent: TParent, context: ${this.contextType}, info${infoModifier}: ${this.options.resolveInfoType}): ${possbileTypes.join(' | ')} | Promise<${possbileTypes.join(' | ')}>;`,
-            '}'
-        ]);
-
+    private generateUnionTypeResolver(type: IntrospectionUnionType) {
+        const interfaceName = this.generateTypeResolver(type);
         this.resolverObject.push(...[
             `${type.name}${this.getModifier()}: {`,
             `__resolveType: ${interfaceName}`,
@@ -135,22 +125,40 @@ export class TSResolverGenerator {
         ]);
     }
 
-    private generateObjectResolver(objectType: IntrospectionObjectType, isSubscription: boolean = false) {
-        const typeResolverName = `${this.options.typePrefix}${objectType.name}TypeResolver`;
+      private generateTypeResolver(type: IntrospectionUnionType | IntrospectionInterfaceType) {
+        const possibleTypes = type.possibleTypes.map(pt => `'${pt.name}'`);
+        const interfaceName = `${this.options.typePrefix}${type.name}ResolveType`;
+        const infoModifier = this.options.optionalResolverInfo ? '?' : '';
+
+        this.resolverInterfaces.push(...[
+            `export interface ${interfaceName}<TParent = ${this.guessTParent(type.name)}> {`,
+            `(parent: TParent, context: ${this.contextType}, info${infoModifier}: ${this.options.resolveInfoType}): ${possibleTypes.join(' | ')};`,
+            '}'
+        ]);
+        return interfaceName;
+    }
+
+    private generateObjectResolver(type: IntrospectionObjectType | IntrospectionInterfaceType, isSubscription: boolean = false) {
+        const typeResolverName = `${this.options.typePrefix}${type.name}TypeResolver`;
         const typeResolverBody: string[] = [];
         const fieldResolversTypeDefs: string[] = [];
 
-        objectType.fields.forEach(field => {
+        if (type.kind === 'INTERFACE') {
+            const interfaceName = this.generateTypeResolver(type);
+            typeResolverBody.push(`__resolveType: ${interfaceName}`);
+        }
+
+        type.fields.forEach(field => {
             // generate args type
             let argsType = '{}';
 
             let uppercaseFirstFieldName = toUppercaseFirst(field.name);
 
             if (field.args.length > 0) {
-                argsType = `${objectType.name}To${uppercaseFirstFieldName}Args`;
+                argsType = `${type.name}To${uppercaseFirstFieldName}Args`;
                 const argsBody: string[] = [];
                 field.args.forEach(arg => {
-                    const { fieldName, fieldType } = createFieldRef(arg, this.options.typePrefix, false);
+                    const {fieldName, fieldType} = createFieldRef(arg, this.options.typePrefix, false);
                     argsBody.push(`${fieldName}: ${fieldType};`);
                 });
 
@@ -162,24 +170,24 @@ export class TSResolverGenerator {
             }
 
             // generate field type
-            const fieldResolverName = `${objectType.name}To${uppercaseFirstFieldName}Resolver`;
+            const fieldResolverName = `${type.name}To${uppercaseFirstFieldName}Resolver`;
 
-            const TParent = this.guessTParent(objectType.name);
+            const TParent = this.guessTParent(type.name);
             const TResult = this.guessTResult(field);
             const infoModifier = this.options.optionalResolverInfo ? '?' : '';
             const returnType =
                 this.options.asyncResult === 'always'
                     ? 'Promise<TResult>'
                     : !!this.options.asyncResult
-                        ? 'TResult | Promise<TResult>'
-                        : 'TResult';
+                    ? 'TResult | Promise<TResult>'
+                    : 'TResult';
             const subscriptionReturnType =
                 this.options.asyncResult ? 'AsyncIterator<TResult> | Promise<AsyncIterator<TResult>>' : 'AsyncIterator<TResult>';
             const fieldResolverTypeDef = !isSubscription
                 ? [
                     `export interface ${fieldResolverName}<TParent = ${TParent}, TResult = ${TResult}> {`,
                     `(parent: TParent, args: ${argsType}, context: ${this.contextType}, info${infoModifier}: ${
-                this.options.resolveInfoType}): ${returnType};`,
+                        this.options.resolveInfoType}): ${returnType};`,
                     '}',
                     ''
                 ]
@@ -201,7 +209,7 @@ export class TSResolverGenerator {
         });
 
         this.resolverInterfaces.push(...[
-            `export interface ${typeResolverName}<TParent = ${this.guessTParent(objectType.name)}> {`,
+            `export interface ${typeResolverName}<TParent = ${this.guessTParent(type.name)}> {`,
             ...typeResolverBody,
             '}',
             '',
@@ -210,7 +218,7 @@ export class TSResolverGenerator {
 
         // add the type resolver to resolver object
         this.resolverObject.push(...[
-            `${objectType.name}${this.getModifier()}: ${typeResolverName};`
+            `${type.name}${this.getModifier()}: ${typeResolverName};`
         ]);
     }
 
@@ -245,7 +253,7 @@ export class TSResolverGenerator {
 
         // TODO: build TResult
         // set strict-nulls to always true so that fieldType could possibly null;
-        const { fieldType } = createFieldRef(field, this.options.typePrefix, true);
+        const {fieldType} = createFieldRef(field, this.options.typePrefix, true);
         return fieldType;
     }
 
