@@ -15,9 +15,8 @@ import {
     IntrospectionInputObjectType,
     IntrospectionInterfaceType,
     IntrospectionQuery,
-    IntrospectionField,
-    IntrospectionInputValue
 } from 'graphql';
+import { IntrospectionField, IntrospectionInputValue } from 'graphql/utilities/introspectionQuery';
 
 
 export class TypeScriptGenerator {

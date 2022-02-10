@@ -125,7 +125,7 @@ export class TSResolverGenerator {
         ]);
     }
 
-      private generateTypeResolver(type: IntrospectionUnionType | IntrospectionInterfaceType) {
+   private generateTypeResolver(type: IntrospectionUnionType | IntrospectionInterfaceType) {
         const possibleTypes = type.possibleTypes.map(pt => `'${pt.name}'`);
         const interfaceName = `${this.options.typePrefix}${type.name}ResolveType`;
         const infoModifier = this.options.optionalResolverInfo ? '?' : '';
