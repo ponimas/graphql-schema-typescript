@@ -16,72 +16,6 @@ import { GraphQLResolveInfo } from 'graphql';
  *          TYPE DEFS          *
  *                             *
  *******************************/
-export interface RootQuery {
-  Users: Array<User>;
-  User?: User;
-  Products?: Array<IProduct>;
-  Search?: SearchResult;
-}
-
-export interface UserFilter {
-  username?: Array<string | null>;
-}
-
-/**
- * A user of the system
- */
-export interface User {
-  firstName: string;
-  lastName: string;
-  
-  /**
-   * 
-   * @deprecated Email will replace username. If you are still using username please change it
-   */
-  username: string;
-  email: string;
-  role: UserRole;
-  
-  /**
-   * Url to the image
-   */
-  profilePicture?: string;
-  
-  /**
-   * Account must be activated before using
-   */
-  activated: boolean;
-}
-
-/**
- * Different role will have different access to our functionality
- * In the future, this will be changed by having User as interface
- * and implementing multiple User
- */
-export enum UserRole {
-  
-  /**
-   * System Administrator
-   */
-  SYS_ADMIN = 'SYS_ADMIN',
-  
-  /**
-   * Manager - Have access to manage functions
-   */
-  MANAGER = 'MANAGER',
-  
-  /**
-   * General Staff
-   */
-  CLERK = 'CLERK',
-  
-  /**
-   * 
-   * @deprecated Use 'clerk' instead
-   */
-  EMPLOYEE = 'EMPLOYEE'
-}
-
 export interface IProduct {
   id: string;
   name: string;
@@ -97,18 +31,6 @@ export type PossibleIProductTypeNames = 'ProductA' | 'ProductB';
 
 export interface IProductNameMap {
   IProduct: IProduct;
-  ProductA: ProductA;
-  ProductB: ProductB;
-}
-
-export type SearchResult = User | ProductA | ProductB;
-
-/** Use this to resolve union type SearchResult */
-export type PossibleSearchResultTypeNames = 'User' | 'ProductA' | 'ProductB';
-
-export interface SearchResultNameMap {
-  SearchResult: SearchResult;
-  User: User;
   ProductA: ProductA;
   ProductB: ProductB;
 }
@@ -187,15 +109,20 @@ export interface ProductListScalar {
   listBoolean4: Array<boolean>;
 }
 
+export interface RootQuery {
+  Users: Array<User>;
+  User?: User;
+  Products?: Array<IProduct>;
+  Search?: SearchResult;
+}
+
 export interface RootMutation {
   createUser?: User;
 }
 
-export interface CreateUserInput {
-  username: string;
-  email: string;
-  password: string;
-  createdAt: Date;
+export interface RootSubscription {
+  userLoggedIn: User;
+  saleMade: string;
 }
 
 /**
@@ -203,9 +130,82 @@ export interface CreateUserInput {
  */
 export type Date = any;
 
-export interface RootSubscription {
-  userLoggedIn: User;
-  saleMade: string;
+export type SearchResult = User | ProductA | ProductB;
+
+/** Use this to resolve union type SearchResult */
+export type PossibleSearchResultTypeNames = 'User' | 'ProductA' | 'ProductB';
+
+export interface SearchResultNameMap {
+  SearchResult: SearchResult;
+  User: User;
+  ProductA: ProductA;
+  ProductB: ProductB;
+}
+
+/**
+ * A user of the system
+ */
+export interface User {
+  firstName: string;
+  lastName: string;
+  
+  /**
+   * 
+   * @deprecated Email will replace username. If you are still using username please change it
+   */
+  username: string;
+  email: string;
+  role: UserRole;
+  
+  /**
+   * Url to the image
+   */
+  profilePicture?: string;
+  
+  /**
+   * Account must be activated before using
+   */
+  activated: boolean;
+}
+
+/**
+ * Different role will have different access to our functionality
+ * In the future, this will be changed by having User as interface
+ * and implementing multiple User
+ */
+export enum UserRole {
+  
+  /**
+   * System Administrator
+   */
+  SYS_ADMIN = 'SYS_ADMIN',
+  
+  /**
+   * Manager - Have access to manage functions
+   */
+  MANAGER = 'MANAGER',
+  
+  /**
+   * General Staff
+   */
+  CLERK = 'CLERK',
+  
+  /**
+   * 
+   * @deprecated Use 'clerk' instead
+   */
+  EMPLOYEE = 'EMPLOYEE'
+}
+
+export interface UserFilter {
+  username?: Array<string | null>;
+}
+
+export interface CreateUserInput {
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
 }
 
 /*********************************
@@ -219,88 +219,21 @@ export interface RootSubscription {
  * However, you can still use other generated interfaces to make your resolver type-safed
  */
 export interface Resolver {
-  RootQuery?: RootQueryTypeResolver;
-  User?: UserTypeResolver;
   IProduct?: IProductTypeResolver;
-  SearchResult?: {
-    __resolveType: SearchResultResolveType
-  };
-  
   ProductA?: ProductATypeResolver;
   ProductScalar?: ProductScalarTypeResolver;
   ProductB?: ProductBTypeResolver;
   ProductListScalar?: ProductListScalarTypeResolver;
+  RootQuery?: RootQueryTypeResolver;
   RootMutation?: RootMutationTypeResolver;
-  Date?: GraphQLScalarType;
   RootSubscription?: RootSubscriptionTypeResolver;
+  Date?: GraphQLScalarType;
+  SearchResult?: {
+    __resolveType: SearchResultResolveType
+  };
+  
+  User?: UserTypeResolver;
 }
-export interface RootQueryTypeResolver<TParent = any> {
-  Users?: RootQueryToUsersResolver<TParent>;
-  User?: RootQueryToUserResolver<TParent>;
-  Products?: RootQueryToProductsResolver<TParent>;
-  Search?: RootQueryToSearchResolver<TParent>;
-}
-
-export interface RootQueryToUsersArgs {
-  input?: UserFilter;
-}
-export interface RootQueryToUsersResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: RootQueryToUsersArgs, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToUserResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToProductsResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToSearchArgs {
-  key?: string;
-}
-export interface RootQueryToSearchResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: RootQueryToSearchArgs, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserTypeResolver<TParent = any> {
-  firstName?: UserToFirstNameResolver<TParent>;
-  lastName?: UserToLastNameResolver<TParent>;
-  username?: UserToUsernameResolver<TParent>;
-  email?: UserToEmailResolver<TParent>;
-  role?: UserToRoleResolver<TParent>;
-  profilePicture?: UserToProfilePictureResolver<TParent>;
-  activated?: UserToActivatedResolver<TParent>;
-}
-
-export interface UserToFirstNameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToLastNameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToUsernameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToEmailResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToRoleResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToProfilePictureResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToActivatedResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
 export interface IProductResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'ProductA' | 'ProductB';
 }
@@ -323,9 +256,6 @@ export interface IProductToRelatedProductsResolver<TParent = any, TResult = any>
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface SearchResultResolveType<TParent = any> {
-  (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
-}
 export interface ProductATypeResolver<TParent = any> {
   id?: ProductAToIdResolver<TParent>;
   name?: ProductAToNameResolver<TParent>;
@@ -578,6 +508,35 @@ export interface ProductListScalarToListBoolean4Resolver<TParent = any, TResult 
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
+export interface RootQueryTypeResolver<TParent = any> {
+  Users?: RootQueryToUsersResolver<TParent>;
+  User?: RootQueryToUserResolver<TParent>;
+  Products?: RootQueryToProductsResolver<TParent>;
+  Search?: RootQueryToSearchResolver<TParent>;
+}
+
+export interface RootQueryToUsersArgs {
+  input?: UserFilter;
+}
+export interface RootQueryToUsersResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: RootQueryToUsersArgs, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToUserResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToProductsResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToSearchArgs {
+  key?: string;
+}
+export interface RootQueryToSearchResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: RootQueryToSearchArgs, context: any, info: GraphQLResolveInfo): TResult;
+}
+
 export interface RootMutationTypeResolver<TParent = any> {
   createUser?: RootMutationToCreateUserResolver<TParent>;
 }
@@ -606,6 +565,47 @@ export interface RootSubscriptionToSaleMadeResolver<TParent = any, TResult = any
   resolve?: (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo) => TResult;
   subscribe: (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo) => AsyncIterator<TResult>;
 }
+
+export interface SearchResultResolveType<TParent = any> {
+  (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
+}
+export interface UserTypeResolver<TParent = any> {
+  firstName?: UserToFirstNameResolver<TParent>;
+  lastName?: UserToLastNameResolver<TParent>;
+  username?: UserToUsernameResolver<TParent>;
+  email?: UserToEmailResolver<TParent>;
+  role?: UserToRoleResolver<TParent>;
+  profilePicture?: UserToProfilePictureResolver<TParent>;
+  activated?: UserToActivatedResolver<TParent>;
+}
+
+export interface UserToFirstNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToLastNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToUsernameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToEmailResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToRoleResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToProfilePictureResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToActivatedResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
 "
 `;
 
@@ -625,72 +625,6 @@ import { GraphQLResolveInfo } from 'graphql';
  *          TYPE DEFS          *
  *                             *
  *******************************/
-export interface MyCustomPrefixRootQuery {
-  Users: Array<MyCustomPrefixUser>;
-  User?: MyCustomPrefixUser;
-  Products?: Array<MyCustomPrefixIProduct>;
-  Search?: MyCustomPrefixSearchResult;
-}
-
-export interface MyCustomPrefixUserFilter {
-  username?: Array<string | null>;
-}
-
-/**
- * A user of the system
- */
-export interface MyCustomPrefixUser {
-  firstName: string;
-  lastName: string;
-  
-  /**
-   * 
-   * @deprecated Email will replace username. If you are still using username please change it
-   */
-  username: string;
-  email: string;
-  role: MyCustomPrefixUserRole;
-  
-  /**
-   * Url to the image
-   */
-  profilePicture?: string;
-  
-  /**
-   * Account must be activated before using
-   */
-  activated: boolean;
-}
-
-/**
- * Different role will have different access to our functionality
- * In the future, this will be changed by having User as interface
- * and implementing multiple User
- */
-export enum MyCustomPrefixUserRole {
-  
-  /**
-   * System Administrator
-   */
-  SYS_ADMIN = 'SYS_ADMIN',
-  
-  /**
-   * Manager - Have access to manage functions
-   */
-  MANAGER = 'MANAGER',
-  
-  /**
-   * General Staff
-   */
-  CLERK = 'CLERK',
-  
-  /**
-   * 
-   * @deprecated Use 'clerk' instead
-   */
-  EMPLOYEE = 'EMPLOYEE'
-}
-
 export interface MyCustomPrefixIProduct {
   id: string;
   name: string;
@@ -706,24 +640,6 @@ export type MyCustomPrefixPossibleIProductTypeNames = 'ProductA' | 'ProductB';
 
 export interface MyCustomPrefixIProductNameMap {
   IProduct: MyCustomPrefixIProduct;
-  ProductA: MyCustomPrefixProductA;
-  ProductB: MyCustomPrefixProductB;
-}
-
-export type MyCustomPrefixSearchResult =
-MyCustomPrefixUser |
-MyCustomPrefixProductA |
-MyCustomPrefixProductB;
-
-/** Use this to resolve union type SearchResult */
-export type MyCustomPrefixPossibleSearchResultTypeNames =
-'User' |
-'ProductA' |
-'ProductB';
-
-export interface MyCustomPrefixSearchResultNameMap {
-  SearchResult: MyCustomPrefixSearchResult;
-  User: MyCustomPrefixUser;
   ProductA: MyCustomPrefixProductA;
   ProductB: MyCustomPrefixProductB;
 }
@@ -802,15 +718,20 @@ export interface MyCustomPrefixProductListScalar {
   listBoolean4: Array<boolean>;
 }
 
+export interface MyCustomPrefixRootQuery {
+  Users: Array<MyCustomPrefixUser>;
+  User?: MyCustomPrefixUser;
+  Products?: Array<MyCustomPrefixIProduct>;
+  Search?: MyCustomPrefixSearchResult;
+}
+
 export interface MyCustomPrefixRootMutation {
   createUser?: MyCustomPrefixUser;
 }
 
-export interface MyCustomPrefixCreateUserInput {
-  username: string;
-  email: string;
-  password: string;
-  createdAt: MyCustomPrefixDate;
+export interface MyCustomPrefixRootSubscription {
+  userLoggedIn: MyCustomPrefixUser;
+  saleMade: string;
 }
 
 /**
@@ -818,9 +739,88 @@ export interface MyCustomPrefixCreateUserInput {
  */
 export type MyCustomPrefixDate = any;
 
-export interface MyCustomPrefixRootSubscription {
-  userLoggedIn: MyCustomPrefixUser;
-  saleMade: string;
+export type MyCustomPrefixSearchResult =
+MyCustomPrefixUser |
+MyCustomPrefixProductA |
+MyCustomPrefixProductB;
+
+/** Use this to resolve union type SearchResult */
+export type MyCustomPrefixPossibleSearchResultTypeNames =
+'User' |
+'ProductA' |
+'ProductB';
+
+export interface MyCustomPrefixSearchResultNameMap {
+  SearchResult: MyCustomPrefixSearchResult;
+  User: MyCustomPrefixUser;
+  ProductA: MyCustomPrefixProductA;
+  ProductB: MyCustomPrefixProductB;
+}
+
+/**
+ * A user of the system
+ */
+export interface MyCustomPrefixUser {
+  firstName: string;
+  lastName: string;
+  
+  /**
+   * 
+   * @deprecated Email will replace username. If you are still using username please change it
+   */
+  username: string;
+  email: string;
+  role: MyCustomPrefixUserRole;
+  
+  /**
+   * Url to the image
+   */
+  profilePicture?: string;
+  
+  /**
+   * Account must be activated before using
+   */
+  activated: boolean;
+}
+
+/**
+ * Different role will have different access to our functionality
+ * In the future, this will be changed by having User as interface
+ * and implementing multiple User
+ */
+export enum MyCustomPrefixUserRole {
+  
+  /**
+   * System Administrator
+   */
+  SYS_ADMIN = 'SYS_ADMIN',
+  
+  /**
+   * Manager - Have access to manage functions
+   */
+  MANAGER = 'MANAGER',
+  
+  /**
+   * General Staff
+   */
+  CLERK = 'CLERK',
+  
+  /**
+   * 
+   * @deprecated Use 'clerk' instead
+   */
+  EMPLOYEE = 'EMPLOYEE'
+}
+
+export interface MyCustomPrefixUserFilter {
+  username?: Array<string | null>;
+}
+
+export interface MyCustomPrefixCreateUserInput {
+  username: string;
+  email: string;
+  password: string;
+  createdAt: MyCustomPrefixDate;
 }
 
 /*********************************
@@ -834,88 +834,21 @@ export interface MyCustomPrefixRootSubscription {
  * However, you can still use other generated interfaces to make your resolver type-safed
  */
 export interface MyCustomPrefixResolver {
-  RootQuery?: MyCustomPrefixRootQueryTypeResolver;
-  User?: MyCustomPrefixUserTypeResolver;
   IProduct?: MyCustomPrefixIProductTypeResolver;
-  SearchResult?: {
-    __resolveType: MyCustomPrefixSearchResultResolveType
-  };
-  
   ProductA?: MyCustomPrefixProductATypeResolver;
   ProductScalar?: MyCustomPrefixProductScalarTypeResolver;
   ProductB?: MyCustomPrefixProductBTypeResolver;
   ProductListScalar?: MyCustomPrefixProductListScalarTypeResolver;
+  RootQuery?: MyCustomPrefixRootQueryTypeResolver;
   RootMutation?: MyCustomPrefixRootMutationTypeResolver;
-  Date?: GraphQLScalarType;
   RootSubscription?: MyCustomPrefixRootSubscriptionTypeResolver;
+  Date?: GraphQLScalarType;
+  SearchResult?: {
+    __resolveType: MyCustomPrefixSearchResultResolveType
+  };
+  
+  User?: MyCustomPrefixUserTypeResolver;
 }
-export interface MyCustomPrefixRootQueryTypeResolver<TParent = any> {
-  Users?: RootQueryToUsersResolver<TParent>;
-  User?: RootQueryToUserResolver<TParent>;
-  Products?: RootQueryToProductsResolver<TParent>;
-  Search?: RootQueryToSearchResolver<TParent>;
-}
-
-export interface RootQueryToUsersArgs {
-  input?: MyCustomPrefixUserFilter;
-}
-export interface RootQueryToUsersResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: RootQueryToUsersArgs, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToUserResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToProductsResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface RootQueryToSearchArgs {
-  key?: string;
-}
-export interface RootQueryToSearchResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: RootQueryToSearchArgs, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface MyCustomPrefixUserTypeResolver<TParent = any> {
-  firstName?: UserToFirstNameResolver<TParent>;
-  lastName?: UserToLastNameResolver<TParent>;
-  username?: UserToUsernameResolver<TParent>;
-  email?: UserToEmailResolver<TParent>;
-  role?: UserToRoleResolver<TParent>;
-  profilePicture?: UserToProfilePictureResolver<TParent>;
-  activated?: UserToActivatedResolver<TParent>;
-}
-
-export interface UserToFirstNameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToLastNameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToUsernameResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToEmailResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToRoleResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToProfilePictureResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface UserToActivatedResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
 export interface MyCustomPrefixIProductResolveType<TParent = any> {
   (parent: TParent, context: any, info: GraphQLResolveInfo): 'ProductA' | 'ProductB';
 }
@@ -938,9 +871,6 @@ export interface IProductToRelatedProductsResolver<TParent = any, TResult = any>
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface MyCustomPrefixSearchResultResolveType<TParent = any> {
-  (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
-}
 export interface MyCustomPrefixProductATypeResolver<TParent = any> {
   id?: ProductAToIdResolver<TParent>;
   name?: ProductAToNameResolver<TParent>;
@@ -1193,6 +1123,35 @@ export interface ProductListScalarToListBoolean4Resolver<TParent = any, TResult 
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
+export interface MyCustomPrefixRootQueryTypeResolver<TParent = any> {
+  Users?: RootQueryToUsersResolver<TParent>;
+  User?: RootQueryToUserResolver<TParent>;
+  Products?: RootQueryToProductsResolver<TParent>;
+  Search?: RootQueryToSearchResolver<TParent>;
+}
+
+export interface RootQueryToUsersArgs {
+  input?: MyCustomPrefixUserFilter;
+}
+export interface RootQueryToUsersResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: RootQueryToUsersArgs, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToUserResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToProductsResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface RootQueryToSearchArgs {
+  key?: string;
+}
+export interface RootQueryToSearchResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: RootQueryToSearchArgs, context: any, info: GraphQLResolveInfo): TResult;
+}
+
 export interface MyCustomPrefixRootMutationTypeResolver<TParent = any> {
   createUser?: RootMutationToCreateUserResolver<TParent>;
 }
@@ -1220,6 +1179,47 @@ export interface RootSubscriptionToUserLoggedInResolver<TParent = any, TResult =
 export interface RootSubscriptionToSaleMadeResolver<TParent = any, TResult = any> {
   resolve?: (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo) => TResult;
   subscribe: (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo) => AsyncIterator<TResult>;
+}
+
+export interface MyCustomPrefixSearchResultResolveType<TParent = any> {
+  (parent: TParent, context: any, info: GraphQLResolveInfo): 'User' | 'ProductA' | 'ProductB';
+}
+export interface MyCustomPrefixUserTypeResolver<TParent = any> {
+  firstName?: UserToFirstNameResolver<TParent>;
+  lastName?: UserToLastNameResolver<TParent>;
+  username?: UserToUsernameResolver<TParent>;
+  email?: UserToEmailResolver<TParent>;
+  role?: UserToRoleResolver<TParent>;
+  profilePicture?: UserToProfilePictureResolver<TParent>;
+  activated?: UserToActivatedResolver<TParent>;
+}
+
+export interface UserToFirstNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToLastNameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToUsernameResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToEmailResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToRoleResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToProfilePictureResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
+}
+
+export interface UserToActivatedResolver<TParent = any, TResult = any> {
+  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 "
 `;
