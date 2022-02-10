@@ -4,7 +4,7 @@ import { GraphQLSchema,  IntrospectionQuery } from 'graphql';
 import { GenerateTypescriptOptions, defaultOptions } from './types';
 import { TSResolverGenerator } from './typescriptResolverGenerator';
 import { TypeScriptGenerator } from './typescriptGenerator';
-import { formatTabSpace, introspectSchema, introspectSchemaViaLocalFile } from './utils';
+import { formatTabSpace, introspectSchema, introspectSchemaStr, introspectSchemaViaLocalFile } from './utils';
 
 export { GenerateTypescriptOptions } from './types';
 
@@ -63,7 +63,7 @@ export const generateTSTypesAsString = (
         introspectResult = introspectSchema(schema);
     }
 
-    const tsGenerator = new TypeScriptGenerator(mergedOptions, introspectResult, outputPath);
+    const tsGenerator = new TypeScriptGenerator(mergedOptions, introspectResult!, outputPath);
     const typeDefs = tsGenerator.generate();
 
     const tsResolverGenerator = new TSResolverGenerator(mergedOptions, introspectResult);

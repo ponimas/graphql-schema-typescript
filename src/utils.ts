@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { join } from 'path';
 import {
     graphqlSync,
-    introspectionQuery,
+    getIntrospectionQuery,
     GraphQLSchema,
     IntrospectionQuery,
     IntrospectionField,
@@ -15,7 +15,7 @@ import { makeExecutableSchema } from 'graphql-tools';
  * Send introspection query to a graphql schema
  */
 export const introspectSchema = (schema: GraphQLSchema): IntrospectionQuery => {
-    const { data, errors } = graphqlSync(schema, introspectionQuery);
+  const { data, errors } = graphqlSync(schema, getIntrospectionQuery());
 
     if (errors) {
         throw errors;
