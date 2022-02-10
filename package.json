@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "camelcase": "^6.2.0",
+    "graphql-tools": "^4.0.7",
     "lodash": "^4.17.15",
     "yargs": "^16.0.0"
   },
