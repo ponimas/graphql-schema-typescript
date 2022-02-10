@@ -32,7 +32,6 @@
     "del-cli": "^2.0.0",
     "fs-extra": "4.0.2",
     "graphql": "^15.5.0",
-    "graphql-tools": "^4.0.7",
     "jest": "^26.0.0",
     "ts-jest": "^26.0.0",
     "tslint": "5.8.0",
@@ -54,15 +53,14 @@
       "./src/setupTest.ts"
     ],
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".ts": "ts-jest"
     },
     "testRegex": "/__tests__/.*\\.test\\.ts$",
     "moduleFileExtensions": [
       "ts",
-      "tsx",
-      "js",
-      "json"
-    ]
+      "js"
+    ],
+    "testTimeout": 30000
   },
   "bugs": {
     "url": "https://github.com/ruiaraujo/graphql-schema-typescript/issues"
