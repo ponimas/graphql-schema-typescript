@@ -19,6 +19,7 @@ import {
     IntrospectionInputValue
 } from 'graphql';
 
+
 export class TypeScriptGenerator {
 
     constructor(
@@ -27,7 +28,7 @@ export class TypeScriptGenerator {
         protected outputPath: string
     ) { }
 
-    public async generate(): Promise<string[]> {
+    public generate(): string[] {
         const { introspectResult } = this;
         const gqlTypes = introspectResult.__schema.types.filter(type => !isBuiltinType(type));
 
@@ -35,7 +36,7 @@ export class TypeScriptGenerator {
             (prevTypescriptDefs, gqlType) => {
 
                 const jsDoc = descriptionToJSDoc({ description: gqlType.description });
-                let typeScriptDefs: string[] = [].concat(jsDoc);
+                let typeScriptDefs = jsDoc.slice(0);
 
                 switch (gqlType.kind) {
                     case 'SCALAR': {
@@ -138,7 +139,7 @@ export class TypeScriptGenerator {
         if (this.options.enumsAsPascalCase) {
             return pascalCase(graphQlName);
         } else {
-            return graphQlName;            
+            return graphQlName;
         }
     }
 
@@ -146,7 +147,7 @@ export class TypeScriptGenerator {
         objectType: IntrospectionObjectType | IntrospectionInputObjectType | IntrospectionInterfaceType,
         allGQLTypes: IntrospectionType[]
     ): string[] {
-        const fields: readonly (IntrospectionInputValue | IntrospectionField)[]
+        const fields: ReadonlyArray<IntrospectionInputValue | IntrospectionField>
             = objectType.kind === 'INPUT_OBJECT' ? objectType.inputFields : objectType.fields;
 
         const extendTypes: string[] = objectType.kind === 'OBJECT'
@@ -161,15 +162,14 @@ export class TypeScriptGenerator {
             []
         );
 
-        const objectFields = fields.reduce<string[]>(
-            (prevTypescriptDefs, field, index) => {
-
+        const objectFields = fields.reduce(
+            (prevTypescriptDefs, field) => {
                 if (extendFields.indexOf(field.name) !== -1 && this.options.minimizeInterfaceImplementation) {
                     return prevTypescriptDefs;
                 }
 
                 const fieldJsDoc = descriptionToJSDoc(field);
-                const { fieldName, fieldType } = createFieldRef(field, this.options.typePrefix, this.options.strictNulls);
+                const { fieldName, fieldType } = createFieldRef(field, this.options.typePrefix, !!this.options.strictNulls);
                 const fieldNameAndType = `${fieldName}: ${fieldType};`;
                 let typescriptDefs = [...fieldJsDoc, fieldNameAndType];
 
@@ -180,7 +180,7 @@ export class TypeScriptGenerator {
                 return prevTypescriptDefs.concat(typescriptDefs);
 
             },
-            []
+            [] as string[]
         );
 
         const possibleTypeNames: string[] = [];
